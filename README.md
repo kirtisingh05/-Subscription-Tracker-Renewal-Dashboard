@@ -1,50 +1,278 @@
-# The Subscription Tracker & Renewal Dashboard
+# SaaSify - Subscription Tracker & Renewal Dashboard
 
-[cite_start]Developed for the **Quantiphi Vibe Coding Round** on the **Unstop** assessment platform[cite: 6, 8, 34, 35]. [cite_start]This application is a modular personal finance dashboard that aggregates a user's recurring SaaS applications and streaming subscriptions, tracks their upcoming renewal dates, and monitors monthly cash-flow burn rates[cite: 10].
+## Overview
 
-## 🏗️ Clean, Scalable Architecture
-Following strict enterprise guidelines, this system features a complete decoupling of responsibilities:
-* [cite_start]**Server-Side Computation Engine:** All business logic, cost calculations, interval normalization, and date evaluations are computed entirely on the server side to maintain computational integrity[cite: 51].
-* [cite_start]**Presentation Layer:** The frontend handles user interactions and visual presentation, relying entirely on the server's data schemas[cite: 52].
+SaaSify is a full-stack Subscription Tracker & Renewal Dashboard that helps users manage recurring SaaS products and streaming subscriptions in one place.
 
----
+The application allows users to:
 
-## 🧠 Satisfying the Problem Statement Criteria
-
-### 1. Cost Uniformity Engine (Backend Logic)
-[cite_start]Because subscriptions have varying billing cycles (Monthly vs. Yearly), the backend engine parses form submissions and dynamically normalizes annual subscription data down to a monthly rate[cite: 12, 18]. [cite_start]This guarantees that the top **Total Monthly Burn Rate** metric remains completely precise regardless of input structure[cite: 13, 18].
-
-### 2. Date Intersect Calculator (Backend Logic)
-[cite_start]The system evaluates input dates against a fixed current calendar time to determine the exact number of days remaining until the next billing event occurs[cite: 19]. [cite_start]If an active subscription's renewal falls within 7 days, the server flags it, triggering an amber **"Renewing Soon"** caution badge on the grid and incrementing the **Upcoming Renewals Alert Count** card[cite: 13, 15, 19].
-
-### 3. The Vibe Check (State Management & Real-Time Simulation)
-[cite_start]Clicking a row's interactive "Active / Paused" Toggle Switch updates the database state instantly without deleting the item from the records[cite: 16, 21]. Switching an item to "Paused":
-* [cite_start]Visually greys out that table row instantly on the frontend[cite: 22].
-* [cite_start]Triggers a backend state change that completely excludes that specific cost from the top Monthly Burn Rate metric, providing a real-time savings simulation[cite: 22].
+* Add and manage subscriptions
+* Track renewal dates
+* Monitor monthly spending (Burn Rate)
+* Identify upcoming renewals
+* Pause subscriptions to simulate savings
+* View subscription insights through a dashboard
 
 ---
 
-## 🛠️ Tech Stack
-* **Frontend:** HTML5, Tailwind CSS (via ultra-low latency CDN execution), JavaScript (Fetch API)
-* **Backend:** Node.js, Express.js, CORS
-* **Database Layer:** MySQL Workbench (PostgreSQL/Supabase ready schema included)
+## Features
+
+### Subscription Management
+
+* Add new subscriptions
+* Edit subscription details
+* Delete subscriptions
+* Track monthly and yearly plans
+* Manage subscription status (Active / Paused)
+
+### Monthly Burn Rate
+
+The dashboard automatically calculates the total monthly spending across all active subscriptions.
+
+For yearly subscriptions:
+
+Monthly Cost = Annual Cost / 12
+
+This provides a normalized monthly burn rate across all billing cycles.
+
+### Upcoming Renewal Alerts
+
+The system continuously evaluates renewal dates and highlights subscriptions renewing within the next 7 days.
+
+### Active / Paused Toggle
+
+Users can pause subscriptions without deleting them.
+
+When a subscription is paused:
+
+* The subscription remains visible
+* The row is visually greyed out
+* The subscription is excluded from Monthly Burn Rate calculations
+
+This provides a real-time savings simulation.
+
+### Renewing Soon Badge
+
+Subscriptions with renewal dates within 7 days are automatically marked with a:
+
+**Renewing Soon** badge.
 
 ---
 
-## 🚀 Rapid Local Setup & Testing
+## Tech Stack
 
-### 1. Database Setup (MySQL)
-Execute the following query in your MySQL Workbench environment to initialize the schema:
-```sql
-CREATE DATABASE IF NOT EXISTS sub_dashboard;
-USE sub_dashboard;
+### Frontend
 
-CREATE TABLE subscriptions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    service_name VARCHAR(255) NOT NULL,
-    cost DECIMAL(10, 2) NOT NULL,
-    billing_cycle ENUM('Monthly', 'Yearly') NOT NULL,
-    next_renewal_date DATE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+* Next.js
+* TypeScript
+* Tailwind CSS
+* React
+
+### Backend
+
+* Node.js
+* Express.js
+* TypeScript
+
+### Database
+
+* SQLite
+
+---
+
+## Project Structure
+
+```text
+frontend/
+│
+├── src/
+│   ├── app/
+│   │   └── dashboard/
+│   ├── components/
+│   ├── lib/
+│   └── types/
+│
+backend/
+│
+├── src/
+│   ├── routes/
+│   ├── services/
+│   └── index.ts
+```
+
+---
+
+## Business Logic
+
+### Monthly Burn Rate
+
+```text
+Monthly Subscription:
+Monthly Cost = Cost
+
+Yearly Subscription:
+Monthly Cost = Cost / 12
+```
+
+Only Active subscriptions contribute to the Burn Rate.
+
+---
+
+### Upcoming Renewals
+
+```text
+Days Remaining =
+Renewal Date - Current Date
+```
+
+If:
+
+```text
+Days Remaining <= 7
+```
+
+The subscription is flagged as:
+
+```text
+Renewing Soon
+```
+
+---
+
+### Pause Subscription
+
+When a user pauses a subscription:
+
+```text
+Status:
+ACTIVE → PAUSED
+```
+
+Effects:
+
+* Subscription remains in the dashboard
+* UI is greyed out
+* Burn Rate updates immediately
+* Savings are reflected in real time
+
+---
+
+## Installation
+
+### Clone Repository
+
+```bash
+git clone <repository-url>
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+Frontend runs on:
+
+```text
+http://localhost:3000
+```
+
+### Backend
+
+```bash
+cd backend
+
+npm install
+
+npm run dev
+```
+
+Backend runs on:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## API Endpoints
+
+### Get Dashboard Metrics
+
+```http
+GET /api/dashboard
+```
+
+Response:
+
+```json
+{
+  "monthlyBurnRate": 2450.50,
+  "upcomingRenewals": 3
+}
+```
+
+### Get Subscriptions
+
+```http
+GET /api/subscriptions
+```
+
+### Create Subscription
+
+```http
+POST /api/subscriptions
+```
+
+### Toggle Subscription Status
+
+```http
+PATCH /api/subscriptions/:id/status
+```
+
+---
+
+## Future Improvements
+
+* Authentication & Authorization
+* Email Renewal Notifications
+* Multi-Currency Support
+* Recurring Payment Analytics
+* Category-Based Insights
+* Subscription Export Reports
+
+---
+
+## Assessment Requirements Covered
+
+✅ Service Name, Cost, Billing Cycle, Renewal Date
+
+✅ Monthly Burn Rate Calculation
+
+✅ Upcoming Renewals Alert Count
+
+✅ Renewing Soon Badge
+
+✅ Active / Paused Toggle
+
+✅ Real-Time Savings Simulation
+
+✅ Renewal Date Tracking
+
+✅ Subscription Dashboard
+
+✅ Full-Stack Architecture
+
+---
+
+## Author
+
+Kirti Singh
+
+BE Information Technology | University of Mumbai
+
+Graduating 2026
